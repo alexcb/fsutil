@@ -2,6 +2,7 @@ package fsutil
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -26,6 +27,7 @@ type Stream interface {
 }
 
 func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool)) error {
+	fmt.Printf("ACB call to Send\n")
 	s := &sender{
 		conn:         &syncStream{Stream: conn},
 		fs:           fs,
