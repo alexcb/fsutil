@@ -189,6 +189,7 @@ type fileSender struct {
 }
 
 func (fs *fileSender) Write(dt []byte) (int, error) {
+	fmt.Printf("ACB filesender.write %d\n", len(dt))
 	if len(dt) == 0 {
 		return 0, nil
 	}
