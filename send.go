@@ -132,7 +132,9 @@ func (s *sender) queue(id uint32) error {
 }
 
 func (s *sender) sendFile(h *sendHandle) error {
-	fmt.Printf("ACB sender.sendFile %v\n", h.path)
+	fmt.Printf("ACB sender.sendFile %q\n", h.path)
+	fmt.Printf("ACB sender.sendFile %q\n", h.path)
+	fmt.Printf("ACB sender.sendFile %q\n", h.path)
 	f, err := s.fs.Open(h.path)
 	if err == nil {
 		defer f.Close()
