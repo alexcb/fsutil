@@ -132,17 +132,18 @@ func (s *sender) queue(id uint32) error {
 }
 
 func (s *sender) sendFile(h *sendHandle) error {
-	fmt.Printf("ACB sender.sendFile %q\n", h.path)
-	fmt.Printf("ACB sender.sendFile %q\n", h.path)
-	fmt.Printf("ACB sender.sendFile %q\n", h.path)
 	f, err := s.fs.Open(h.path)
 	if err == nil {
 		defer f.Close()
 		buf := bufPool.Get().(*[]byte)
 		defer bufPool.Put(buf)
-		if _, err := io.CopyBuffer(&fileSender{sender: s, id: h.id}, f, *buf); err != nil {
+		fs := fileSender{sender: s, id: h.id}
+		if _, err := io.CopyBuffer(&fs, f, *buf); err != nil {
 			return err
 		}
+		fmt.Printf("ACB sender.sendFile %q sent %d bytes\n", h.path, fs.bytesWritten)
+		fmt.Printf("ACB sender.sendFile2 %q sent %d bytes\n", h.path, fs.bytesWritten)
+		fmt.Printf("ACB sender.sendFile3 %q sent %d bytes\n", h.path, fs.bytesWritten)
 	}
 	return s.conn.SendMsg(&types.Packet{ID: h.id, Type: types.PACKET_DATA})
 }
@@ -184,14 +185,12 @@ func fileCanRequestData(m os.FileMode) bool {
 }
 
 type fileSender struct {
-	sender *sender
-	id     uint32
+	sender       *sender
+	id           uint32
+	bytesWritten int
 }
 
 func (fs *fileSender) Write(dt []byte) (int, error) {
-	fmt.Printf("ACB filesender.write1 %d\n", len(dt))
-	fmt.Printf("ACB filesender.write2 %d\n", len(dt))
-	fmt.Printf("ACB filesender.write3 %d\n", len(dt))
 	if len(dt) == 0 {
 		return 0, nil
 	}
@@ -200,6 +199,7 @@ func (fs *fileSender) Write(dt []byte) (int, error) {
 		return 0, err
 	}
 	fs.sender.updateProgress(p.Size(), false)
+	fs.bytesWritten += len(dt)
 	return len(dt), nil
 }
 
