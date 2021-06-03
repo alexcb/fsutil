@@ -2,6 +2,7 @@ package fsutil
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -173,6 +174,8 @@ func (r *receiver) run(ctx context.Context) error {
 				size += p.Size()
 				r.progressCb(size, false)
 			}
+
+			fmt.Printf("ACB got packet %v\n", p.Type)
 
 			switch p.Type {
 			case types.PACKET_ERR:
