@@ -2,7 +2,6 @@ package fsutil
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"sync"
