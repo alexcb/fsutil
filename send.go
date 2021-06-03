@@ -151,6 +151,7 @@ func (s *sender) sendFile(h *sendHandle) error {
 func (s *sender) walk(ctx context.Context) error {
 	var i uint32 = 0
 	err := s.fs.Walk(ctx, func(path string, fi os.FileInfo, err error) error {
+		fmt.Printf("ACB walk %q\n", path)
 		if err != nil {
 			return err
 		}
