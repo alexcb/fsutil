@@ -26,14 +26,15 @@ type Stream interface {
 	Context() context.Context
 }
 
-func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool)) error {
+func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), progressVerboseCb func(string, VerboseProgressStatus, int)) error {
 	fmt.Printf("ACB call to Send\n")
 	s := &sender{
-		conn:         &syncStream{Stream: conn},
-		fs:           fs,
-		files:        make(map[uint32]string),
-		progressCb:   progressCb,
-		sendpipeline: make(chan *sendHandle, 128),
+		conn:              &syncStream{Stream: conn},
+		fs:                fs,
+		files:             make(map[uint32]string),
+		progressCb:        progressCb,
+		progressVerboseCb: progressVerboseCb,
+		sendpipeline:      make(chan *sendHandle, 128),
 	}
 	return s.run(ctx)
 }
@@ -44,13 +45,14 @@ type sendHandle struct {
 }
 
 type sender struct {
-	conn            Stream
-	fs              FS
-	files           map[uint32]string
-	mu              sync.RWMutex
-	progressCb      func(int, bool)
-	progressCurrent int
-	sendpipeline    chan *sendHandle
+	conn              Stream
+	fs                FS
+	files             map[uint32]string
+	mu                sync.RWMutex
+	progressCb        func(int, bool)
+	progressVerboseCb func(string, VerboseProgressStatus, int)
+	progressCurrent   int
+	sendpipeline      chan *sendHandle
 }
 
 func (s *sender) run(ctx context.Context) error {
@@ -141,9 +143,9 @@ func (s *sender) sendFile(h *sendHandle) error {
 		if _, err := io.CopyBuffer(&fs, f, *buf); err != nil {
 			return err
 		}
-		fmt.Printf("ACB sender.sendFile %q sent %d bytes\n", h.path, fs.bytesWritten)
-		fmt.Printf("ACB sender.sendFile2 %q sent %d bytes\n", h.path, fs.bytesWritten)
-		fmt.Printf("ACB sender.sendFile3 %q sent %d bytes\n", h.path, fs.bytesWritten)
+		if s.progressVerboseCb != nil {
+			s.progressVerboseCb(h.path, StatusSent, fs.bytesWritten)
+		}
 	}
 	return s.conn.SendMsg(&types.Packet{ID: h.id, Type: types.PACKET_DATA})
 }
@@ -172,6 +174,11 @@ func (s *sender) walk(ctx context.Context) error {
 		i++
 		s.updateProgress(p.Size(), false)
 		fmt.Printf("ACB sending packet for %q (%d bytes)\n", path, p.Size())
+
+		if s.progressVerboseCb != nil {
+			s.progressVerboseCb(path, StatusStat, p.Size())
+		}
+
 		return errors.Wrapf(s.conn.SendMsg(p), "failed to send stat %s", path)
 	})
 	if err != nil {
