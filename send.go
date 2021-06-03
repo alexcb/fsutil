@@ -171,6 +171,7 @@ func (s *sender) walk(ctx context.Context) error {
 		}
 		i++
 		s.updateProgress(p.Size(), false)
+		fmt.Printf("ACB sending packet for %q (%d bytes)\n", path, p.Size())
 		return errors.Wrapf(s.conn.SendMsg(p), "failed to send stat %s", path)
 	})
 	if err != nil {
