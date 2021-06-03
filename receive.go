@@ -30,6 +30,7 @@ type ReceiveOpt struct {
 }
 
 func Receive(ctx context.Context, conn Stream, dest string, opt ReceiveOpt) error {
+	fmt.Printf("call to fsutil.Receive\n")
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
