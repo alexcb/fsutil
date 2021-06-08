@@ -2,7 +2,6 @@ package fsutil
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -27,7 +26,6 @@ type Stream interface {
 }
 
 func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), verboseProgressCb VerboseProgressCB) error {
-	//fmt.Printf("ACB call to Send\n")
 	s := &sender{
 		conn:              &syncStream{Stream: conn},
 		fs:                fs,
@@ -153,7 +151,6 @@ func (s *sender) sendFile(h *sendHandle) error {
 func (s *sender) walk(ctx context.Context) error {
 	var i uint32 = 0
 	err := s.fs.Walk(ctx, func(path string, fi os.FileInfo, err error) error {
-		fmt.Printf("ACB walk %q\n", path)
 		if err != nil {
 			return err
 		}
@@ -173,7 +170,6 @@ func (s *sender) walk(ctx context.Context) error {
 		}
 		i++
 		s.updateProgress(p.Size(), false)
-		//fmt.Printf("ACB sending packet for %q (%d bytes)\n", path, p.Size())
 
 		if s.verboseProgressCb != nil {
 			s.verboseProgressCb(path, StatusStat, p.Size())
