@@ -2,7 +2,6 @@ package fsutil
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +25,6 @@ type WalkOpt struct {
 }
 
 func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) error {
-	fmt.Printf("Walk with excludes %v\n", opt.ExcludePatterns)
 	root, err := filepath.EvalSymlinks(p)
 	if err != nil {
 		return errors.WithStack(&os.PathError{Op: "resolve", Path: root, Err: err})
