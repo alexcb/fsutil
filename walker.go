@@ -22,7 +22,7 @@ type WalkOpt struct {
 	// before performing the fs walk
 	FollowPaths       []string
 	Map               FilterFunc
-	progressVerboseCb func(string, VerboseProgressStatus, int)
+	ProgressVerboseCb func(string, VerboseProgressStatus, int)
 }
 
 func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) error {
@@ -127,7 +127,9 @@ func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) err
 				}
 
 				if m {
-					fmt.Printf("skipping %v\n", path)
+					if opt.ProgressVerboseCb != nil {
+						opt.ProgressVerboseCb(path, StatusSkipped, 0)
+					}
 					if fi.IsDir() {
 						if !pm.Exclusions() {
 							return filepath.SkipDir
