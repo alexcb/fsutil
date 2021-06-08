@@ -26,14 +26,14 @@ type Stream interface {
 	Context() context.Context
 }
 
-func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), progressVerboseCb VerboseProgressCB) error {
+func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), verboseProgressCb VerboseProgressCB) error {
 	//fmt.Printf("ACB call to Send\n")
 	s := &sender{
 		conn:              &syncStream{Stream: conn},
 		fs:                fs,
 		files:             make(map[uint32]string),
 		progressCb:        progressCb,
-		progressVerboseCb: progressVerboseCb,
+		verboseProgressCb: verboseProgressCb,
 		sendpipeline:      make(chan *sendHandle, 128),
 	}
 	return s.run(ctx)
@@ -50,7 +50,7 @@ type sender struct {
 	files             map[uint32]string
 	mu                sync.RWMutex
 	progressCb        func(int, bool)
-	progressVerboseCb VerboseProgressCB
+	verboseProgressCb VerboseProgressCB
 	progressCurrent   int
 	sendpipeline      chan *sendHandle
 }
@@ -143,8 +143,8 @@ func (s *sender) sendFile(h *sendHandle) error {
 		if _, err := io.CopyBuffer(&fs, f, *buf); err != nil {
 			return err
 		}
-		if s.progressVerboseCb != nil {
-			s.progressVerboseCb(h.path, StatusSent, fs.bytesWritten)
+		if s.verboseProgressCb != nil {
+			s.verboseProgressCb(h.path, StatusSent, fs.bytesWritten)
 		}
 	}
 	return s.conn.SendMsg(&types.Packet{ID: h.id, Type: types.PACKET_DATA})
@@ -175,8 +175,8 @@ func (s *sender) walk(ctx context.Context) error {
 		s.updateProgress(p.Size(), false)
 		//fmt.Printf("ACB sending packet for %q (%d bytes)\n", path, p.Size())
 
-		if s.progressVerboseCb != nil {
-			s.progressVerboseCb(path, StatusStat, p.Size())
+		if s.verboseProgressCb != nil {
+			s.verboseProgressCb(path, StatusStat, p.Size())
 		}
 
 		return errors.Wrapf(s.conn.SendMsg(p), "failed to send stat %s", path)
