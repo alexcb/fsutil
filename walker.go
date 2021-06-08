@@ -127,6 +127,7 @@ func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) err
 				}
 
 				if m {
+					fmt.Printf("skipping %v\n", path)
 					if fi.IsDir() {
 						if !pm.Exclusions() {
 							return filepath.SkipDir
@@ -144,8 +145,6 @@ func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) err
 						return filepath.SkipDir
 					}
 					return nil
-				} else {
-					fmt.Printf("skipping %v\n", path)
 				}
 			}
 		}
