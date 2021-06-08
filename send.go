@@ -26,7 +26,7 @@ type Stream interface {
 	Context() context.Context
 }
 
-func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), progressVerboseCb func(string, VerboseProgressStatus, int)) error {
+func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), progressVerboseCb VerboseProgressCB) error {
 	//fmt.Printf("ACB call to Send\n")
 	s := &sender{
 		conn:              &syncStream{Stream: conn},
@@ -50,7 +50,7 @@ type sender struct {
 	files             map[uint32]string
 	mu                sync.RWMutex
 	progressCb        func(int, bool)
-	progressVerboseCb func(string, VerboseProgressStatus, int)
+	progressVerboseCb VerboseProgressCB
 	progressCurrent   int
 	sendpipeline      chan *sendHandle
 }

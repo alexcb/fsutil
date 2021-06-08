@@ -12,16 +12,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type VerboseProgressStatus int
-
-const (
-	StatusStat VerboseProgressStatus = iota
-	StatusSkipped
-	StatusSending
-	StatusSent
-	StatusFailed
-)
-
 type DiffType int
 
 const (
@@ -31,13 +21,12 @@ const (
 )
 
 type ReceiveOpt struct {
-	NotifyHashed      ChangeFunc
-	ContentHasher     ContentHasher
-	ProgressCb        func(int, bool)
-	ProgressVerboseCb func(string, VerboseProgressStatus)
-	Merge             bool
-	Filter            FilterFunc
-	Differ            DiffType
+	NotifyHashed  ChangeFunc
+	ContentHasher ContentHasher
+	ProgressCb    func(int, bool)
+	Merge         bool
+	Filter        FilterFunc
+	Differ        DiffType
 }
 
 func Receive(ctx context.Context, conn Stream, dest string, opt ReceiveOpt) error {
@@ -46,33 +35,31 @@ func Receive(ctx context.Context, conn Stream, dest string, opt ReceiveOpt) erro
 	defer cancel()
 
 	r := &receiver{
-		conn:              &syncStream{Stream: conn},
-		dest:              dest,
-		files:             make(map[string]uint32),
-		pipes:             make(map[uint32]io.WriteCloser),
-		notifyHashed:      opt.NotifyHashed,
-		contentHasher:     opt.ContentHasher,
-		progressCb:        opt.ProgressCb,
-		progressVerboseCb: opt.ProgressVerboseCb,
-		merge:             opt.Merge,
-		filter:            opt.Filter,
-		differ:            opt.Differ,
+		conn:          &syncStream{Stream: conn},
+		dest:          dest,
+		files:         make(map[string]uint32),
+		pipes:         make(map[uint32]io.WriteCloser),
+		notifyHashed:  opt.NotifyHashed,
+		contentHasher: opt.ContentHasher,
+		progressCb:    opt.ProgressCb,
+		merge:         opt.Merge,
+		filter:        opt.Filter,
+		differ:        opt.Differ,
 	}
 	return r.run(ctx)
 }
 
 type receiver struct {
-	dest              string
-	conn              Stream
-	files             map[string]uint32
-	pipes             map[uint32]io.WriteCloser
-	mu                sync.RWMutex
-	muPipes           sync.RWMutex
-	progressCb        func(int, bool)
-	progressVerboseCb func(string, VerboseProgressStatus)
-	merge             bool
-	filter            FilterFunc
-	differ            DiffType
+	dest       string
+	conn       Stream
+	files      map[string]uint32
+	pipes      map[uint32]io.WriteCloser
+	mu         sync.RWMutex
+	muPipes    sync.RWMutex
+	progressCb func(int, bool)
+	merge      bool
+	filter     FilterFunc
+	differ     DiffType
 
 	notifyHashed   ChangeFunc
 	contentHasher  ContentHasher

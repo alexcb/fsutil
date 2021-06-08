@@ -20,8 +20,9 @@ type WalkOpt struct {
 	ExcludePatterns []string
 	// FollowPaths contains symlinks that are resolved into include patterns
 	// before performing the fs walk
-	FollowPaths []string
-	Map         FilterFunc
+	FollowPaths       []string
+	Map               FilterFunc
+	progressVerboseCb func(string, VerboseProgressStatus, int)
 }
 
 func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) error {
