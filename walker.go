@@ -2,6 +2,7 @@ package fsutil
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -125,6 +126,7 @@ func Walk(ctx context.Context, p string, opt *WalkOpt, fn filepath.WalkFunc) err
 				}
 
 				if m {
+					fmt.Printf("ACB hello!\n")
 					if opt.VerboseProgressCB != nil {
 						opt.VerboseProgressCB(path, StatusSkipped, 0)
 					}

@@ -2,6 +2,7 @@ package fsutil
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -143,6 +144,8 @@ func (s *sender) sendFile(h *sendHandle) error {
 		if _, err := io.CopyBuffer(&fs, f, *buf); err != nil {
 			return err
 		}
+
+		fmt.Printf("ACB hello2!\n")
 		if s.verboseProgressCb != nil {
 			s.verboseProgressCb(h.path, StatusSent, fs.bytesWritten)
 		}
@@ -173,6 +176,7 @@ func (s *sender) walk(ctx context.Context) error {
 		i++
 		s.updateProgress(p.Size(), false)
 
+		fmt.Printf("ACB hello3!\n")
 		if s.verboseProgressCb != nil {
 			s.verboseProgressCb(path, StatusStat, p.Size())
 		}
