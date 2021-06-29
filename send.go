@@ -27,6 +27,7 @@ type Stream interface {
 }
 
 func Send(ctx context.Context, conn Stream, fs FS, progressCb func(int, bool), verboseProgressCb VerboseProgressCB) error {
+	fmt.Printf("ACB fsutils.Send %v\n", fs)
 	s := &sender{
 		conn:              &syncStream{Stream: conn},
 		fs:                fs,
@@ -135,6 +136,7 @@ func (s *sender) queue(id uint32) error {
 }
 
 func (s *sender) sendFile(h *sendHandle) error {
+	fmt.Printf("ACB fsutil.sendFile %q!\n", h.path)
 	f, err := s.fs.Open(h.path)
 	if err == nil {
 		defer f.Close()
@@ -145,7 +147,6 @@ func (s *sender) sendFile(h *sendHandle) error {
 			return err
 		}
 
-		fmt.Printf("ACB hello2!\n")
 		if s.verboseProgressCb != nil {
 			s.verboseProgressCb(h.path, StatusSent, fs.bytesWritten)
 		}
