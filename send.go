@@ -177,7 +177,7 @@ func (s *sender) walk(ctx context.Context) error {
 		i++
 		s.updateProgress(p.Size(), false)
 
-		fmt.Printf("ACB hello3!\n")
+		fmt.Printf("ACB fsutil.walk func sending stat for %q!\n", path)
 		if s.verboseProgressCb != nil {
 			s.verboseProgressCb(path, StatusStat, p.Size())
 		}
